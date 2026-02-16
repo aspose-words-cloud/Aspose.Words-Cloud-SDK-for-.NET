@@ -2,9 +2,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>26.1.0.0</AssemblyVersion>
-    <FileVersion>26.1.0.0</FileVersion>
-    <Version>26.1.0.0</Version>
+    <AssemblyVersion>26.2.0.0</AssemblyVersion>
+    <FileVersion>26.2.0.0</FileVersion>
+    <Version>26.2.0.0</Version>
     <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>

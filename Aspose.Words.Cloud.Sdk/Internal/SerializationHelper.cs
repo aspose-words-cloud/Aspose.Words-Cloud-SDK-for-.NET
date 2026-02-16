@@ -80,6 +80,7 @@ namespace Aspose.Words.Cloud.Sdk
             { "CustomXmlPartsResponse, _", typeof(CustomXmlPartsResponse) },
             { "CustomXmlPartUpdate, _", typeof(CustomXmlPartUpdate) },
             { "DigitalSignatureDetails, _", typeof(DigitalSignatureDetails) },
+            { "DoclingSaveOptionsData, _", typeof(DoclingSaveOptionsData) },
             { "DocmSaveOptionsData, _", typeof(DocmSaveOptionsData) },
             { "DocSaveOptionsData, _", typeof(DocSaveOptionsData) },
             { "Document, _", typeof(Document) },
