@@ -246,9 +246,14 @@ namespace Aspose.Words.Cloud.Sdk.Model
             SubSuperscript,
 
             /// <summary>
-            /// Enum value "Supercript"
+            /// Enum value "Superscript"
             /// </summary>
-            Supercript,
+            Superscript,
+
+            /// <summary>
+            /// Enum value "None"
+            /// </summary>
+            None,
         }
 
         /// <summary>
