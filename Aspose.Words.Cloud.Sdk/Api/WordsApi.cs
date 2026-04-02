@@ -33,6 +33,7 @@ namespace Aspose.Words.Cloud.Sdk
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using Aspose.Words.Cloud.Sdk.Api;
     using Aspose.Words.Cloud.Sdk.Model;
     using Aspose.Words.Cloud.Sdk.Model.Requests;
     using Aspose.Words.Cloud.Sdk.Model.Responses;
@@ -90,7 +91,7 @@ namespace Aspose.Words.Cloud.Sdk
             requestHandlers.Add(new OAuthRequestHandler(this.configuration));
             requestHandlers.Add(new DebugLogRequestHandler(this.configuration));
             requestHandlers.Add(new ApiExceptionRequestHandler());
-            this.apiInvoker = new ApiInvoker(requestHandlers, configuration.Timeout);
+            this.apiInvoker = new ApiInvoker(requestHandlers, configuration);
         }
 
         /// <summary>
@@ -126,11 +127,33 @@ namespace Aspose.Words.Cloud.Sdk
         /// <summary>
         /// Appends documents to the original document.
         /// </summary>
+        /// <param name="request">Request. <see cref="AppendDocumentJobRequest" /></param>
+        /// <returns><see cref="JobHandler< DocumentResponse >" /></returns>
+        public async Task<JobHandler< DocumentResponse >> AppendDocumentJob(AppendDocumentJobRequest request)
+        {
+            var info = (JobInfo)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+            return new JobHandler< DocumentResponse >(this.apiInvoker, request.GetOriginalRequest(), info);
+        }
+
+        /// <summary>
+        /// Appends documents to the original document.
+        /// </summary>
         /// <param name="request">Request. <see cref="AppendDocumentOnlineRequest" /></param>
         /// <returns><see cref="AppendDocumentOnlineResponse" /></returns>
         public async Task<AppendDocumentOnlineResponse> AppendDocumentOnline(AppendDocumentOnlineRequest request)
         {
             return (AppendDocumentOnlineResponse)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+        }
+
+        /// <summary>
+        /// Appends documents to the original document.
+        /// </summary>
+        /// <param name="request">Request. <see cref="AppendDocumentOnlineJobRequest" /></param>
+        /// <returns><see cref="JobHandler< AppendDocumentOnlineResponse >" /></returns>
+        public async Task<JobHandler< AppendDocumentOnlineResponse >> AppendDocumentOnlineJob(AppendDocumentOnlineJobRequest request)
+        {
+            var info = (JobInfo)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+            return new JobHandler< AppendDocumentOnlineResponse >(this.apiInvoker, request.GetOriginalRequest(), info);
         }
 
         /// <summary>
@@ -223,6 +246,17 @@ namespace Aspose.Words.Cloud.Sdk
         public async Task<System.IO.Stream> ConvertDocument(ConvertDocumentRequest request)
         {
             return (System.IO.Stream)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+        }
+
+        /// <summary>
+        /// Converts a document on a local drive to the specified format.
+        /// </summary>
+        /// <param name="request">Request. <see cref="ConvertDocumentJobRequest" /></param>
+        /// <returns><see cref="JobHandler< System.IO.Stream >" /></returns>
+        public async Task<JobHandler< System.IO.Stream >> ConvertDocumentJob(ConvertDocumentJobRequest request)
+        {
+            var info = (JobInfo)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+            return new JobHandler< System.IO.Stream >(this.apiInvoker, request.GetOriginalRequest(), info);
         }
 
         /// <summary>
@@ -932,6 +966,17 @@ namespace Aspose.Words.Cloud.Sdk
         }
 
         /// <summary>
+        /// Executes a Mail Merge operation.
+        /// </summary>
+        /// <param name="request">Request. <see cref="ExecuteMailMergeJobRequest" /></param>
+        /// <returns><see cref="JobHandler< DocumentResponse >" /></returns>
+        public async Task<JobHandler< DocumentResponse >> ExecuteMailMergeJob(ExecuteMailMergeJobRequest request)
+        {
+            var info = (JobInfo)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+            return new JobHandler< DocumentResponse >(this.apiInvoker, request.GetOriginalRequest(), info);
+        }
+
+        /// <summary>
         /// Executes a Mail Merge operation online.
         /// </summary>
         /// <param name="request">Request. <see cref="ExecuteMailMergeOnlineRequest" /></param>
@@ -939,6 +984,17 @@ namespace Aspose.Words.Cloud.Sdk
         public async Task<System.IO.Stream> ExecuteMailMergeOnline(ExecuteMailMergeOnlineRequest request)
         {
             return (System.IO.Stream)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+        }
+
+        /// <summary>
+        /// Executes a Mail Merge operation online.
+        /// </summary>
+        /// <param name="request">Request. <see cref="ExecuteMailMergeOnlineJobRequest" /></param>
+        /// <returns><see cref="JobHandler< System.IO.Stream >" /></returns>
+        public async Task<JobHandler< System.IO.Stream >> ExecuteMailMergeOnlineJob(ExecuteMailMergeOnlineJobRequest request)
+        {
+            var info = (JobInfo)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+            return new JobHandler< System.IO.Stream >(this.apiInvoker, request.GetOriginalRequest(), info);
         }
 
         /// <summary>
@@ -3035,11 +3091,33 @@ namespace Aspose.Words.Cloud.Sdk
         /// <summary>
         /// Splits a document into parts and saves them in the specified format.
         /// </summary>
+        /// <param name="request">Request. <see cref="SplitDocumentJobRequest" /></param>
+        /// <returns><see cref="JobHandler< SplitDocumentResponse >" /></returns>
+        public async Task<JobHandler< SplitDocumentResponse >> SplitDocumentJob(SplitDocumentJobRequest request)
+        {
+            var info = (JobInfo)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+            return new JobHandler< SplitDocumentResponse >(this.apiInvoker, request.GetOriginalRequest(), info);
+        }
+
+        /// <summary>
+        /// Splits a document into parts and saves them in the specified format.
+        /// </summary>
         /// <param name="request">Request. <see cref="SplitDocumentOnlineRequest" /></param>
         /// <returns><see cref="SplitDocumentOnlineResponse" /></returns>
         public async Task<SplitDocumentOnlineResponse> SplitDocumentOnline(SplitDocumentOnlineRequest request)
         {
             return (SplitDocumentOnlineResponse)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+        }
+
+        /// <summary>
+        /// Splits a document into parts and saves them in the specified format.
+        /// </summary>
+        /// <param name="request">Request. <see cref="SplitDocumentOnlineJobRequest" /></param>
+        /// <returns><see cref="JobHandler< SplitDocumentOnlineResponse >" /></returns>
+        public async Task<JobHandler< SplitDocumentOnlineResponse >> SplitDocumentOnlineJob(SplitDocumentOnlineJobRequest request)
+        {
+            var info = (JobInfo)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+            return new JobHandler< SplitDocumentOnlineResponse >(this.apiInvoker, request.GetOriginalRequest(), info);
         }
 
         /// <summary>

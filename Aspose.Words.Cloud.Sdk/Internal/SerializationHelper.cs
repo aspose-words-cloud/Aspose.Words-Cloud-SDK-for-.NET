@@ -164,6 +164,7 @@ namespace Aspose.Words.Cloud.Sdk
             { "ImageEntryList, _", typeof(ImageEntryList) },
             { "InfoAdditionalItem, _", typeof(InfoAdditionalItem) },
             { "InfoResponse, _", typeof(InfoResponse) },
+            { "JobInfo, _", typeof(JobInfo) },
             { "JpegSaveOptionsData, _", typeof(JpegSaveOptionsData) },
             { "JsonDataLoadOptions, _", typeof(JsonDataLoadOptions) },
             { "Link, _", typeof(Link) },

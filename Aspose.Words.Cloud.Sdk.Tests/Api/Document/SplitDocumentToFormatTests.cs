@@ -72,6 +72,36 @@ namespace Aspose.Words.Cloud.Sdk.Tests.Api.Document
         }
 
         /// <summary>
+        /// Test for document splitting job.
+        /// </summary>
+        [Test]
+        public async Task TestSplitDocumentJob()
+        {
+            string remoteFileName = "TestSplitDocument.docx";
+
+            await this.UploadFileToStorage(
+                remoteDataFolder + "/" + remoteFileName,
+                null,
+                null,
+                File.ReadAllBytes(LocalTestDataFolder + localFile)
+            );
+
+            var request = new SplitDocumentJobRequest(
+                name: remoteFileName,
+                format: "text",
+                folder: remoteDataFolder,
+                destFileName: BaseTestOutPath + "/TestSplitDocument.text",
+                from: 1,
+                to: 2
+            );
+            var jobHandler = await this.WordsApi.SplitDocumentJob(request);
+            var actual = await jobHandler.WaitResult();
+            Assert.NotNull(actual.SplitResult);
+            Assert.NotNull(actual.SplitResult.Pages);
+            Assert.AreEqual(2, actual.SplitResult.Pages.Count);
+        }
+
+        /// <summary>
         /// Test for document splitting online.
         /// </summary>
         [Test]
@@ -86,6 +116,24 @@ namespace Aspose.Words.Cloud.Sdk.Tests.Api.Document
                 to: 2
             );
             var actual = await this.WordsApi.SplitDocumentOnline(request);
+        }
+
+        /// <summary>
+        /// Test for document splitting online job.
+        /// </summary>
+        [Test]
+        public async Task TestSplitDocumentOnlineJob()
+        {
+            using var requestDocument = File.OpenRead(LocalTestDataFolder + localFile);
+            var request = new SplitDocumentOnlineJobRequest(
+                document: requestDocument,
+                format: "text",
+                destFileName: BaseTestOutPath + "/TestSplitDocument.text",
+                from: 1,
+                to: 2
+            );
+            var jobHandler = await this.WordsApi.SplitDocumentOnlineJob(request);
+            var actual = await jobHandler.WaitResult();
         }
     }
 }
