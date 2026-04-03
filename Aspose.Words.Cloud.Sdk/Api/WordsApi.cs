@@ -3635,7 +3635,7 @@ namespace Aspose.Words.Cloud.Sdk
                 httpContent.Content = multipartFormDataContent;
                 return httpContent;
             });
-            var responseParts = await ApiInvoker.ToMultipartResponse(response);
+            var responseParts = await ApiInvoker.ToMultipartOrderedParts(response);
 
             if (displayIntermediateResults && responseParts.Length != requests.Length)
             {
@@ -3646,24 +3646,16 @@ namespace Aspose.Words.Cloud.Sdk
             for (int i = 0; i < responseParts.Length; i++)
             {
                 var responsePart = responseParts[i];
-                if (responsePart.Content.Headers.Contains("RequestId"))
+                var requestId = responsePart.GetHeader("RequestId");
+                if (!string.IsNullOrEmpty(requestId) && idToRequestMap.ContainsKey(requestId))
                 {
-                    var requestId = responsePart.Content.Headers.GetValues("RequestId").First();
-
-                    if (responsePart.IsSuccessStatusCode)
+                    try
                     {
-                        result[i] = await idToRequestMap[requestId].DeserializeResponse(responsePart);
+                        result[i] = await ApiInvoker.DeserializeHttpResponsePart(idToRequestMap[requestId].Request, responsePart);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        try
-                        {
-                            await ApiExceptionRequestHandler.ThrowApiException(responsePart);
-                        }
-                        catch (Exception ex)
-                        {
-                            result[i] = ex;
-                        }
+                        result[i] = ex;
                     }
                 }
                 else
