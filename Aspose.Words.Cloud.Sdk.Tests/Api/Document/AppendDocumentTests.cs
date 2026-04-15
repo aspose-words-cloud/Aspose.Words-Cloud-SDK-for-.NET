@@ -83,6 +83,47 @@ namespace Aspose.Words.Cloud.Sdk.Tests.Api.Document
         }
 
         /// <summary>
+        /// Test for appending document job.
+        /// </summary>
+        [Test]
+        public async Task TestAppendDocumentJob()
+        {
+            string remoteFileName = "TestAppendDocument.docx";
+
+            await this.UploadFileToStorage(
+                remoteDataFolder + "/" + remoteFileName,
+                null,
+                null,
+                File.ReadAllBytes(LocalTestDataFolder + localFile)
+            );
+
+            var requestDocumentListDocumentEntries0FileReference = new FileReference(remoteDataFolder + "/" + remoteFileName);
+            var requestDocumentListDocumentEntries0 = new DocumentEntry()
+            {
+                FileReference = requestDocumentListDocumentEntries0FileReference,
+                ImportFormatMode = DocumentEntry.ImportFormatModeEnum.KeepSourceFormatting
+            };
+            var requestDocumentListDocumentEntries = new List<DocumentEntry>()
+            {
+                requestDocumentListDocumentEntries0
+            };
+            var requestDocumentList = new DocumentEntryList()
+            {
+                DocumentEntries = requestDocumentListDocumentEntries
+            };
+            var request = new AppendDocumentJobRequest(
+                name: remoteFileName,
+                documentList: requestDocumentList,
+                folder: remoteDataFolder,
+                destFileName: BaseTestOutPath + "/" + remoteFileName
+            );
+            var jobHandler = await this.WordsApi.AppendDocumentJob(request);
+            var actual = await jobHandler.WaitResult();
+            Assert.NotNull(actual.Document);
+            Assert.AreEqual("TestAppendDocument.docx", actual.Document.FileName);
+        }
+
+        /// <summary>
         /// Test for appending document online.
         /// </summary>
         [Test]
@@ -109,6 +150,36 @@ namespace Aspose.Words.Cloud.Sdk.Tests.Api.Document
                 documentList: requestDocumentList
             );
             var actual = await this.WordsApi.AppendDocumentOnline(request);
+        }
+
+        /// <summary>
+        /// Test for appending document online job.
+        /// </summary>
+        [Test]
+        public async Task TestAppendDocumentOnlineJob()
+        {
+            using var requestDocument = File.OpenRead(LocalTestDataFolder + localFile);
+            using var requestDocumentListDocumentEntries0FileReferenceStream = File.OpenRead(LocalTestDataFolder + localFile);
+            var requestDocumentListDocumentEntries0FileReference = new FileReference(requestDocumentListDocumentEntries0FileReferenceStream);
+            var requestDocumentListDocumentEntries0 = new DocumentEntry()
+            {
+                FileReference = requestDocumentListDocumentEntries0FileReference,
+                ImportFormatMode = DocumentEntry.ImportFormatModeEnum.KeepSourceFormatting
+            };
+            var requestDocumentListDocumentEntries = new List<DocumentEntry>()
+            {
+                requestDocumentListDocumentEntries0
+            };
+            var requestDocumentList = new DocumentEntryList()
+            {
+                DocumentEntries = requestDocumentListDocumentEntries
+            };
+            var request = new AppendDocumentOnlineJobRequest(
+                document: requestDocument,
+                documentList: requestDocumentList
+            );
+            var jobHandler = await this.WordsApi.AppendDocumentOnlineJob(request);
+            var actual = await jobHandler.WaitResult();
         }
     }
 }

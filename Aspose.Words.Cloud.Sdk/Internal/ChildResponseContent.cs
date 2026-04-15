@@ -26,7 +26,9 @@
 namespace Aspose.Words.Cloud.Sdk
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using Microsoft.Extensions.Primitives;
 
     /// <summary>
     /// Represents child response content.
@@ -36,30 +38,48 @@ namespace Aspose.Words.Cloud.Sdk
         /// <summary>
         /// Initializes a new instance of the <see cref="ChildResponseContent"/> class.
         /// </summary>
-        /// <param name="disposition">Cotent Disposition</param>
-        /// <param name="contentType">Cotent Type</param>
+        /// <param name="headers">Content headers</param>
         /// <param name="content">Content Stream</param>
-        internal ChildResponseContent(string disposition, string contentType, Stream content)
+        internal ChildResponseContent(Dictionary<string, StringValues> headers, Stream content)
         {
-            this.ContentDisposition = disposition;
-            this.ContentType = contentType;
+            this.Headers = headers ?? new Dictionary<string, StringValues>(StringComparer.OrdinalIgnoreCase);
             this.Content = content;
         }
 
         /// <summary>
+        /// Gets content headers.
+        /// </summary>
+        internal Dictionary<string, StringValues> Headers { get; private set; }
+
+        /// <summary>
         /// Gets content disposition.
         /// </summary>
-        internal string ContentDisposition { get; private set; }
+        internal string ContentDisposition => this.GetHeader("Content-Disposition");
 
         /// <summary>
         /// Gets content type.
         /// </summary>
-        internal string ContentType { get; private set; }
+        internal string ContentType => this.GetHeader("Content-Type");
 
         /// <summary>
         /// Gets content stream.
         /// </summary>
         internal Stream Content { get; private set; }
+
+        /// <summary>
+        /// Gets a header value.
+        /// </summary>
+        /// <param name="name">Header name.</param>
+        /// <returns>First header value or null.</returns>
+        internal string GetHeader(string name)
+        {
+            if (this.Headers.TryGetValue(name, out var value))
+            {
+                return value.Count > 0 ? value[0] : null;
+            }
+
+            return null;
+        }
 
         /// <inheritdoc/>
         public void Dispose()

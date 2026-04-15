@@ -62,6 +62,26 @@ namespace Aspose.Words.Cloud.Sdk.Tests.Api.MailMerge
         }
 
         /// <summary>
+        /// Test for executing mail merge online job.
+        /// </summary>
+        [Test]
+        public async Task TestExecuteMailMergeOnlineJob()
+        {
+            string localDocumentFile = "SampleExecuteTemplate.docx";
+            string localDataFile = "SampleExecuteTemplateData.txt";
+
+            using var requestTemplate = File.OpenRead(LocalTestDataFolder + mailMergeFolder + "/" + localDocumentFile);
+            using var requestData = File.OpenRead(LocalTestDataFolder + mailMergeFolder + "/" + localDataFile);
+            var request = new ExecuteMailMergeOnlineJobRequest(
+                template: requestTemplate,
+                data: requestData,
+                withRegions: true
+            );
+            var jobHandler = await this.WordsApi.ExecuteMailMergeOnlineJob(request);
+            var actual = await jobHandler.WaitResult();
+        }
+
+        /// <summary>
         /// Test for executing mail merge.
         /// </summary>
         [Test]
@@ -86,6 +106,36 @@ namespace Aspose.Words.Cloud.Sdk.Tests.Api.MailMerge
                 destFileName: BaseTestOutPath + "/" + remoteFileName
             );
             var actual = await this.WordsApi.ExecuteMailMerge(request);
+            Assert.NotNull(actual.Document);
+            Assert.AreEqual("TestExecuteMailMerge.docx", actual.Document.FileName);
+        }
+
+        /// <summary>
+        /// Test for executing mail merge job.
+        /// </summary>
+        [Test]
+        public async Task TestExecuteMailMergeJob()
+        {
+            string localDocumentFile = "SampleExecuteTemplate.docx";
+            string remoteFileName = "TestExecuteMailMerge.docx";
+            string localDataFile = File.ReadAllText(LocalTestDataFolder + mailMergeFolder + "/SampleMailMergeTemplateData.txt");
+
+            await this.UploadFileToStorage(
+                remoteDataFolder + "/" + remoteFileName,
+                null,
+                null,
+                File.ReadAllBytes(LocalTestDataFolder + mailMergeFolder + "/" + localDocumentFile)
+            );
+
+            var request = new ExecuteMailMergeJobRequest(
+                name: remoteFileName,
+                data: localDataFile,
+                folder: remoteDataFolder,
+                withRegions: true,
+                destFileName: BaseTestOutPath + "/" + remoteFileName
+            );
+            var jobHandler = await this.WordsApi.ExecuteMailMergeJob(request);
+            var actual = await jobHandler.WaitResult();
             Assert.NotNull(actual.Document);
             Assert.AreEqual("TestExecuteMailMerge.docx", actual.Document.FileName);
         }
