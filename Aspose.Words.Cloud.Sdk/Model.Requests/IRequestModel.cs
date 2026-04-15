@@ -37,6 +37,12 @@ namespace Aspose.Words.Cloud.Sdk.Model.Requests
     public interface IRequestModel
     {
         /// <summary>
+        /// Returns the original request for the current operation.
+        /// </summary>
+        /// <returns>The original request instance.</returns>
+        IRequestModel GetOriginalRequest();
+
+        /// <summary>
         /// Creates the http request based on this request.
         /// </summary>
         /// <param name="configuration">SDK configuration.</param>

@@ -207,5 +207,20 @@ namespace Aspose.Words.Cloud.Sdk.Tests.Api.Document
             );
             var actual = await this.WordsApi.ConvertDocument(request);
         }
+
+        /// <summary>
+        /// A test for ConvertDocument as a job.
+        /// </summary>
+        [Test]
+        public async Task TestConvertDocumentJob()
+        {
+            using var requestDocument = File.OpenRead(LocalTestDataFolder + localFolder + "/test_uploadfile.docx");
+            var request = new ConvertDocumentJobRequest(
+                document: requestDocument,
+                format: "pdf"
+            );
+            var jobHandler = await this.WordsApi.ConvertDocumentJob(request);
+            var actual = await jobHandler.WaitResult();
+        }
     }
 }

@@ -86,6 +86,11 @@ namespace Aspose.Words.Cloud.Sdk.Model.Requests
         public async Task<object> DeserializeResponse(HttpResponseMessage message) => await this.request.DeserializeResponse(message);
 
         /// <summary>
+        /// Gets inner request.
+        /// </summary>
+        internal IRequestModel Request => this.request;
+
+        /// <summary>
         /// Set parent request.
         /// </summary>
         /// <param name="parentRequest">a parent request.</param>

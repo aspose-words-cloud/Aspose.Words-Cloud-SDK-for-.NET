@@ -48,7 +48,7 @@ namespace Aspose.Words.Cloud.Sdk.RequestHandlers
             var requestHandlers = new List<IRequestHandler>();
             requestHandlers.Add(new DebugLogRequestHandler(this.configuration));
             requestHandlers.Add(new ApiExceptionRequestHandler());
-            this.apiInvoker = new ApiInvoker(requestHandlers, configuration.Timeout);
+            this.apiInvoker = new ApiInvoker(requestHandlers, configuration);
         }
 
         public async Task ProcessRequest(HttpRequestMessage request)

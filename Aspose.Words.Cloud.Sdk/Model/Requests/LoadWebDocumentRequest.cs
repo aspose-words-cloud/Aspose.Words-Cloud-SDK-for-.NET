@@ -69,6 +69,15 @@ namespace Aspose.Words.Cloud.Sdk.Model.Requests
         public string Storage { get; set; }
 
         /// <summary>
+        /// Returns the original request for the current operation.
+        /// </summary>
+        /// <returns>The original request instance.</returns>
+        public IRequestModel GetOriginalRequest()
+        {
+            return this;
+        }
+
+        /// <summary>
         /// Creates the http request based on this request.
         /// </summary>
         /// <param name="configuration">SDK configuration.</param>

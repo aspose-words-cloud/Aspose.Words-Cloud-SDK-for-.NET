@@ -35,6 +35,8 @@ namespace Aspose.Words.Cloud.Sdk
     using System.Threading;
     using System.Threading.Tasks;
     using Aspose.Words.Cloud.Sdk.Model;
+    using Aspose.Words.Cloud.Sdk.Model.Requests;
+    using Aspose.Words.Cloud.Sdk.RequestHandlers;
     using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.Extensions.Primitives;
 
@@ -44,6 +46,7 @@ namespace Aspose.Words.Cloud.Sdk
         private const string AsposeClientVersionHeaderName = "x-aspose-client-version";
         private readonly Dictionary<string, string> defaultHeaderMap = new Dictionary<string, string>();
         private readonly List<IRequestHandler> requestHandlers;
+        private readonly Configuration configuration;
 
         /// <summary>
         /// Gets HttpClient instance.
@@ -54,13 +57,14 @@ namespace Aspose.Words.Cloud.Sdk
         /// Initializes a new instance of the <see cref="ApiInvoker"/> class.
         /// </summary>
         /// <param name="requestHandlers">set of request handlers.</param>
-        /// <param name="timeout">timeout in seconds.</param>
-        public ApiInvoker(List<IRequestHandler> requestHandlers, int timeout)
+        /// <param name="configuration">SDK configuration.</param>
+        public ApiInvoker(List<IRequestHandler> requestHandlers, Configuration configuration)
         {
             this.AddDefaultHeader(AsposeClientHeaderName, ".net sdk");
-            this.AddDefaultHeader(AsposeClientVersionHeaderName, "26.3");
+            this.AddDefaultHeader(AsposeClientVersionHeaderName, "26.4");
             this.requestHandlers = requestHandlers;
-            this.HttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(timeout), };
+            this.configuration = configuration;
+            this.HttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(configuration.Timeout), };
         }
 
         internal static async Task<HttpContent> GetRequestContent(List< Tuple<string, object> > formData, IEncryptor encryptor)
@@ -148,29 +152,6 @@ namespace Aspose.Words.Cloud.Sdk
             return multipart;
         }
 
-        internal static async Task<HttpResponseMessage[]> ToMultipartResponse(HttpResponseMessage response)
-        {
-            try
-            {
-                var boundary = response.Content.Headers.ContentType.Parameters
-                    .FirstOrDefault(a => string.Equals(a.Name, "boundary", StringComparison.OrdinalIgnoreCase))?.Value.Trim('"');
-                var reader = new MultipartReader(boundary, await response.Content.ReadAsStreamAsync());
-
-                var result = new List<HttpResponseMessage>();
-                HttpResponseMessage childResponse;
-                while ((childResponse = await ApiInvoker.ReadNextChildResponseAsync(reader)) != null)
-                {
-                    result.Add(childResponse);
-                }
-
-                return result.ToArray();
-            }
-            catch (Exception ex)
-            {
-                throw new ApiException(400, "Failed to read multipart response: " + ex.Message);
-            }
-        }
-
         internal static async Task< Dictionary<string, ChildResponseContent> > ToMultipartForm(HttpResponseMessage response)
         {
             try
@@ -200,7 +181,9 @@ namespace Aspose.Words.Cloud.Sdk
 
                     if (partName != null)
                     {
-                        result.Add(partName, new ChildResponseContent(childSection.ContentDisposition, childSection.ContentType, await SerializationHelper.MultipartSectionToStream(childSection)));
+                        result.Add(partName, new ChildResponseContent(
+                            new Dictionary<string, StringValues>(childSection.Headers, StringComparer.OrdinalIgnoreCase),
+                            await SerializationHelper.MultipartSectionToStream(childSection)));
                     }
                 }
 
@@ -210,6 +193,64 @@ namespace Aspose.Words.Cloud.Sdk
             {
                 throw new ApiException(400, "Failed to read multipart response: " + ex.Message);
             }
+        }
+
+        internal static async Task<ChildResponseContent[]> ToMultipartOrderedParts(HttpResponseMessage response)
+        {
+            try
+            {
+                var boundary = response.Content.Headers.ContentType.Parameters
+                    .FirstOrDefault(a => string.Equals(a.Name, "boundary", StringComparison.OrdinalIgnoreCase))?.Value.Trim('"');
+                var reader = new MultipartReader(boundary, await response.Content.ReadAsStreamAsync());
+
+                var result = new List<ChildResponseContent>();
+                MultipartSection childSection;
+                while ((childSection = await reader.ReadNextSectionAsync()) != null)
+                {
+                    result.Add(new ChildResponseContent(
+                        new Dictionary<string, StringValues>(childSection.Headers, StringComparer.OrdinalIgnoreCase),
+                        await SerializationHelper.MultipartSectionToStream(childSection)));
+                }
+
+                return result.ToArray();
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(400, "Failed to read multipart response: " + ex.Message);
+            }
+        }
+
+        internal static async Task<JobInfo> DeserializeJobInfoPart(ChildResponseContent responsePart)
+        {
+            responsePart.Content.Seek(0, SeekOrigin.Begin);
+            using (var reader = new StreamReader(responsePart.Content, Encoding.UTF8, true, 1024, true))
+            {
+                return (JobInfo)SerializationHelper.Deserialize(await reader.ReadToEndAsync(), typeof(JobInfo));
+            }
+        }
+
+        internal static async Task<object> DeserializeHttpResponsePart(IRequestModel request, ChildResponseContent responsePart)
+        {
+            var response = await ToChildHttpResponseMessage(responsePart);
+            if (response.IsSuccessStatusCode)
+            {
+                return await request.DeserializeResponse(response);
+            }
+
+            await ApiExceptionRequestHandler.ThrowApiException(response);
+            return null;
+        }
+
+        internal async Task<ChildResponseContent[]> CallJobResult(string jobId)
+        {
+            var response = await this.InvokeApi(async () =>
+            {
+                var path = this.configuration.GetApiRootUrl() + "/words/job";
+                path = await UrlHelper.AddQueryParameterToUrl(path, "id", jobId, null);
+                return new HttpRequestMessage(HttpMethod.Get, path);
+            });
+
+            return await ApiInvoker.ToMultipartOrderedParts(response);
         }
 
         internal async Task<HttpResponseMessage> InvokeApi(System.Func< Task<HttpRequestMessage> > httpRequestFactory)
@@ -231,46 +272,68 @@ namespace Aspose.Words.Cloud.Sdk
             }
         }
 
-        private static async Task<HttpResponseMessage> ReadNextChildResponseAsync(MultipartReader reader, CancellationToken cancellationToken = default(CancellationToken))
+        private static async Task<HttpResponseMessage> ToChildHttpResponseMessage(ChildResponseContent responsePart, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var section = await reader.ReadNextSectionAsync(cancellationToken).ConfigureAwait(false);
-            if (section == null)
+            responsePart.Content.Seek(0, SeekOrigin.Begin);
+
+            var bufferedStream = new BufferedReadStream(responsePart.Content, 4096);
+            var line = await bufferedStream.ReadLineAsync(MultipartReader.DefaultHeadersLengthLimit, cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrEmpty(line))
             {
-                return null;
+                throw new InvalidDataException("Invalid response line.");
             }
 
-            var bufferedStream = new BufferedReadStream(section.Body, 4096);
-            var line = await bufferedStream.ReadLineAsync(MultipartReader.DefaultHeadersLengthLimit, cancellationToken).ConfigureAwait(false);
             var requestLineParts = line.Split(' ');
-            if (requestLineParts.Length < 2)
+            int statusCode;
+            int reasonPhraseIndex;
+            if (requestLineParts.Length >= 3 && requestLineParts[0].StartsWith("HTTP/"))
+            {
+                if (!int.TryParse(requestLineParts[1], out statusCode))
+                {
+                    throw new InvalidDataException("Invalid response status code.");
+                }
+
+                reasonPhraseIndex = 2;
+            }
+            else if (requestLineParts.Length >= 2 && int.TryParse(requestLineParts[0], out statusCode))
+            {
+                reasonPhraseIndex = 1;
+            }
+            else
             {
                 throw new InvalidDataException("Invalid response line.");
             }
 
             var headers = await ApiInvoker.ReadHeadersAsync(bufferedStream, cancellationToken).ConfigureAwait(false);
-
-            var response = new HttpResponseMessage();
-
-            HttpStatusCode statusCode;
-            if (Enum.TryParse(requestLineParts[0], out statusCode))
+            var response = new HttpResponseMessage((HttpStatusCode)statusCode)
             {
-                response.StatusCode = statusCode;
-            }
+                ReasonPhrase = string.Join(" ", requestLineParts.Skip(reasonPhraseIndex)),
+            };
 
             var contentStream = new MemoryStream();
             await bufferedStream.CopyToAsync(contentStream);
             contentStream.Position = 0;
             response.Content = new StreamContent(contentStream);
 
-            foreach (var header in headers)
-            {
-                if (!response.Content.Headers.Contains(header.Key))
-                {
-                    response.Content.Headers.Add(header.Key, header.Value.ToArray());
-                }
-            }
+            ApiInvoker.AddHeaders(response, headers);
 
             return response;
+        }
+
+        private static void AddHeaders(HttpResponseMessage response, Dictionary<string, StringValues> headers)
+        {
+            foreach (var header in headers)
+            {
+                if (response.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray()))
+                {
+                    continue;
+                }
+
+                if (!response.Content.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray()))
+                {
+                    throw new InvalidDataException($"Invalid header line: {header.Key}");
+                }
+            }
         }
 
         private static async Task<Dictionary<string, StringValues>> ReadHeadersAsync(BufferedReadStream stream, CancellationToken cancellationToken = default(CancellationToken))
