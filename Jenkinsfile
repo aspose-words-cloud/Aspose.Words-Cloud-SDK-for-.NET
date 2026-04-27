@@ -89,5 +89,6 @@ node('win2019_1') {
         }
 	} finally {
         bat (script: 'docker rmi $(docker images -f "dangling=true" -q) || exit 0')
+		cleanWs()
 	}
 }
