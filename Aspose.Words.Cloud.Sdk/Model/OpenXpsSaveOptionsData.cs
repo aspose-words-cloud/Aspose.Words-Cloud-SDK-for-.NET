@@ -81,6 +81,7 @@ namespace Aspose.Words.Cloud.Sdk.Model
             sb.Append("  PageCount: ").Append(this.PageCount).Append("\n");
             sb.Append("  PageIndex: ").Append(this.PageIndex).Append("\n");
             sb.Append("  BookmarksOutlineLevel: ").Append(this.BookmarksOutlineLevel).Append("\n");
+            sb.Append("  CompressionLevel: ").Append(this.CompressionLevel).Append("\n");
             sb.Append("  DigitalSignatureDetails: ").Append(this.DigitalSignatureDetails).Append("\n");
             sb.Append("  HeadingsOutlineLevels: ").Append(this.HeadingsOutlineLevels).Append("\n");
             sb.Append("  OutlineOptions: ").Append(this.OutlineOptions).Append("\n");
