@@ -39,6 +39,11 @@ namespace Aspose.Words.Cloud.Sdk.Model
     public class CompareData : IFileReference, IModel
     {
         /// <summary>
+        /// Gets or sets advanced compare options that might help to produce more precise comparison output.
+        /// </summary>
+        public virtual AdvancedCompareOptions AdvancedOptions { get; set; }
+
+        /// <summary>
         /// Gets or sets the initials of the author to use for revisions.
         /// </summary>
         public virtual string Author { get; set; }
@@ -98,6 +103,11 @@ namespace Aspose.Words.Cloud.Sdk.Model
                 throw new ArgumentException("Property FileReference in CompareData is required.");
             }
 
+            this.AdvancedOptions?.Validate();
+
+
+
+
             this.CompareOptions?.Validate();
 
 
@@ -117,6 +127,7 @@ namespace Aspose.Words.Cloud.Sdk.Model
         {
             var sb = new StringBuilder();
             sb.Append("class CompareData {\n");
+            sb.Append("  AdvancedOptions: ").Append(this.AdvancedOptions).Append("\n");
             sb.Append("  Author: ").Append(this.Author).Append("\n");
             sb.Append("  CompareOptions: ").Append(this.CompareOptions).Append("\n");
             sb.Append("  ComparingWithDocument: ").Append(this.ComparingWithDocument).Append("\n");

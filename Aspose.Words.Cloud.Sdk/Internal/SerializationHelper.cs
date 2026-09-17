@@ -43,6 +43,7 @@ namespace Aspose.Words.Cloud.Sdk
     {
         public static readonly IReadOnlyDictionary<string, Type> ModelTypes = new Dictionary<string, Type>()
         {
+            { "AdvancedCompareOptions, _", typeof(AdvancedCompareOptions) },
             { "ApiError, _", typeof(ApiError) },
             { "AvailableFontsResponse, _", typeof(AvailableFontsResponse) },
             { "Azw3SaveOptionsData, _", typeof(Azw3SaveOptionsData) },
