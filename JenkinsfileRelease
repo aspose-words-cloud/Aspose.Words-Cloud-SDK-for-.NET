@@ -6,41 +6,34 @@ parameters {
 		string(name: 'SDK_VERSION', defaultValue: '19.9.0', description: 'version of sdk')
 }
 
-def buildCacheImage = "git.auckland.dynabic.com:4567/words-cloud/api/net"
+def buildCacheImage = "docker.registry.svc.k8s.dynabic.com/words/cloud/sdk/net/release"
 
-node('win2019_2') {
+node('words-linux') {
 	try {
 			stage('checkout'){
 				checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'LocalBranch', localBranch: "**"]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '361885ba-9425-4230-950e-0af201d90547', url: 'https://git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git']]])
 			}
 
 			stage('build'){
-				withCredentials([file(credentialsId: 'pfxFile', variable: 'pfxFilePath')]) {
-					powershell "Copy-Item $pfxFilePath -Destination  .\\scripts\\aspose.pfx"
-				}
-				
-				withCredentials([file(credentialsId: 'snkFile', variable: 'snkFilePath')]) {
-					powershell "Copy-Item $snkFilePath -Destination .\\scripts\\aspose.snk"
+				withCredentials([usernamePassword(credentialsId: 'k8s-registry', usernameVariable: 'dockerrigistry_login', passwordVariable: 'dockerregistry_password')]) {
+					sh 'docker login -u "$dockerrigistry_login" -p "$dockerregistry_password" docker.registry.svc.k8s.dynabic.com'
 				}
 
-				withCredentials([usernamePassword(credentialsId: 'cc2e3c9b-b3da-4455-b702-227bcce18895', usernameVariable: 'dockerrigistry_login', passwordVariable: 'dockerregistry_password')]) {
-					bat 'docker login -u "%dockerrigistry_login%" -p "%dockerregistry_password%" git.auckland.dynabic.com:4567'
+				sh (script: "docker pull ${buildCacheImage} || true")
+				sh (script: "docker build -f scripts/buildRelease.Dockerfile --cache-from=${buildCacheImage} -t ${buildCacheImage} .")
+				sh (script: "docker push ${buildCacheImage}")
+
+				sh 'mkdir -p packages'
+				withCredentials([
+					file(credentialsId: 'pfxFile', variable: 'PFX_FILE'),
+					file(credentialsId: 'snkFile', variable: 'SNK_FILE'),
+					string(credentialsId: 'pfxPassword', variable: 'PFX_PASSWORD')
+				]) {
+					docker.image(buildCacheImage).inside('-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp') {
+						sh 'cd /build && bash scripts/build-release.sh && cp packages/*.nupkg "$WORKSPACE/packages/"'
+					}
 				}
-                
-                bat (script: "docker pull ${buildCacheImage}/buildenv || exit 0")
-                bat 'if exist c:\\temp\\netbuild del /s /q c:\\temp\\netbuild'
-                bat 'if exist temp del /s /q temp'
-                powershell(script: 'Copy-Item -Path . -Destination c:\\temp\\netbuild -filter *.csproj -Recurse -Container')
-                powershell(script: 'Copy-Item -Path . -Destination c:\\temp\\netbuild -filter *.sln -Recurse -Container')
-                powershell(script: '$currFolderName = (Get-Item .).Name ; Copy-Item -Path c:\\temp\\netbuild\\$currFolderName -Destination .\\temp -Recurse -Container')
-                bat (script: "docker build --force-rm -m 4g -f scripts\\buildEnv.Dockerfile --isolation=hyperv --cache-from=${buildCacheImage}/buildenv -t ${buildCacheImage}/buildenv temp")
-                bat (script: "docker push ${buildCacheImage}/buildenv")
-				
-                bat (script: "docker build --force-rm -m 4g -f scripts\\buildRelease.Dockerfile --isolation=hyperv -t netreleasesdkbuild --cache-from=${buildCacheImage} -t ${buildCacheImage} .")
-                
-                bat (script: "if not exist packages mkdir packages")
-				powershell (script: 'docker run --rm -m 4g -v $PWD\\packages:C:\\build\\packages\\ -e SDK_VERSION=$env:SDK_VERSION --isolation=hyperv netreleasesdkbuild scripts\\build-release.bat')
-				stash name: "package", includes: "packages\\*.nupkg"
+				stash name: "package", includes: "packages/*.nupkg"
 			}
 	} finally {
 		deleteDir()
@@ -53,7 +46,7 @@ stage('wait for publish confirmation'){
 	}
 }	
 
-node('win2019_2') {
+node('words-linux') {
 	try {
 			stage('checkout'){
 				checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'LocalBranch', localBranch: "**"]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '361885ba-9425-4230-950e-0af201d90547', url: 'https://git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git']]])
@@ -63,50 +56,52 @@ node('win2019_2') {
 				unstash "package"
 			
 				withCredentials([string(credentialsId: 'nugetToken', variable: 'token')]) {
-					bat '.nuget\\NuGet.exe push packages\\Aspose.Words-Cloud.%SDK_VERSION%.nupkg -ApiKey %token% -Timeout 610 -Source https://www.nuget.org/api/v2/package'
+					docker.image('mcr.microsoft.com/dotnet/sdk:9.0').inside('-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp') {
+						sh 'dotnet nuget push "packages/Aspose.Words-Cloud.$SDK_VERSION.nupkg" --api-key "$token" --timeout 610 --source https://www.nuget.org/api/v2/package'
+					}
 				}
 			}
 		
         stage('Merge master to release'){
             checkout([$class: 'GitSCM', branches: [[name: '*/release']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'LocalBranch', localBranch: "**"]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '361885ba-9425-4230-950e-0af201d90547', url: 'https://git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git']]])
-            bat "git config user.email 'jenkins.aspose@gmail.com'"
-            bat "git config user.name 'jenkins'"
-            bat "git checkout --merge release"
-            bat "git reset --hard origin/release"
-            bat "git merge --no-ff --allow-unrelated-histories origin/master"
-            bat "git diff --name-status"
-            bat 'git commit -am "Merged master branch to release" || exit 0'
+            sh "git config user.email 'jenkins.aspose@gmail.com'"
+            sh "git config user.name 'jenkins'"
+            sh "git checkout --merge release"
+            sh "git reset --hard origin/release"
+            sh "git merge --no-ff --allow-unrelated-histories origin/master"
+            sh "git diff --name-status"
+            sh 'git commit -am "Merged master branch to release" || true'
             withCredentials([usernamePassword(credentialsId: '361885ba-9425-4230-950e-0af201d90547', passwordVariable: 'gitPass', usernameVariable: 'gitUsername')]) {
-                bat "git push https://$gitUsername:$gitPass@git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git release"
+                sh 'git push "https://$gitUsername:$gitPass@git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git" release'
             }
         }
         
         stage('Merge master to testPublishedPackage'){
             checkout([$class: 'GitSCM', branches: [[name: '*/testPublishedPackage']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'LocalBranch', localBranch: "**"]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '361885ba-9425-4230-950e-0af201d90547', url: 'https://git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git']]])
-            bat "git config user.email 'jenkins.aspose@gmail.com'"
-            bat "git config user.name 'jenkins'"
-            bat "git checkout --merge testPublishedPackage"
-            bat "git reset --hard origin/testPublishedPackage"
-            bat "git merge --no-ff --allow-unrelated-histories origin/master"
-            powershell '((Get-Content -path Aspose.Words.Cloud.Sdk.Tests/Aspose.Words.Cloud.Sdk.Tests.csproj -Raw) -replace "(Include=`"Aspose.Words-Cloud`" Version=`")(\\w+.\\w+.\\w+)(`")", ("Include=`"Aspose.Words-Cloud`" Version=`"" + $env:SDK_VERSION + "`"")) | Set-Content -Path Aspose.Words.Cloud.Sdk.Tests/Aspose.Words.Cloud.Sdk.Tests.csproj'
-            powershell '((Get-Content -path Aspose.Words.Cloud.Sdk.BddTests/Aspose.Words.Cloud.Sdk.BddTests.csproj -Raw) -replace "(Include=`"Aspose.Words-Cloud`" Version=`")(\\w+.\\w+.\\w+)(`")", ("Include=`"Aspose.Words-Cloud`" Version=`"" + $env:SDK_VERSION + "`"")) | Set-Content -Path Aspose.Words.Cloud.Sdk.BddTests/Aspose.Words.Cloud.Sdk.BddTests.csproj'
-            bat "git diff --name-status"
-            bat 'git commit -am "Merged master branch to testPublishedPackage" || exit 0'
+            sh "git config user.email 'jenkins.aspose@gmail.com'"
+            sh "git config user.name 'jenkins'"
+            sh "git checkout --merge testPublishedPackage"
+            sh "git reset --hard origin/testPublishedPackage"
+            sh "git merge --no-ff --allow-unrelated-histories origin/master"
+            sh '''sed -i -E '/Include="Aspose.Words-Cloud"/ s/Version="[^"]+"/Version="'"$SDK_VERSION"'"/' Aspose.Words.Cloud.Sdk.Tests/Aspose.Words.Cloud.Sdk.Tests.csproj'''
+            sh '''sed -i -E '/Include="Aspose.Words-Cloud"/ s/Version="[^"]+"/Version="'"$SDK_VERSION"'"/' Aspose.Words.Cloud.Sdk.BddTests/Aspose.Words.Cloud.Sdk.BddTests.csproj'''
+            sh "git diff --name-status"
+            sh 'git commit -am "Merged master branch to testPublishedPackage" || true'
             withCredentials([usernamePassword(credentialsId: '361885ba-9425-4230-950e-0af201d90547', passwordVariable: 'gitPass', usernameVariable: 'gitUsername')]) {
-                bat "git push https://$gitUsername:$gitPass@git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git testPublishedPackage"
+                sh 'git push "https://$gitUsername:$gitPass@git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git" testPublishedPackage'
             }
         }
         
 			stage('add version tag') {			
-				bat "git config user.email 'jenkins.aspose@gmail.com'"
-				bat "git config user.name 'jenkins'"
+				sh "git config user.email 'jenkins.aspose@gmail.com'"
+				sh "git config user.name 'jenkins'"
 				
-				bat "git clean -fd"
-				bat 'git reset --hard origin/master'
-				bat "git tag -a %SDK_VERSION% -m \"version %SDK_VERSION%\""
+				sh "git clean -fd"
+				sh 'git reset --hard origin/master'
+				sh 'git tag -a "$SDK_VERSION" -m "version $SDK_VERSION"'
 				
 				withCredentials([usernamePassword(credentialsId: '361885ba-9425-4230-950e-0af201d90547', usernameVariable: 'gitUsername', passwordVariable: 'gitPass')]) {
-					bat "git push https://%gitUsername%:%gitPass%@git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git %SDK_VERSION%"
+					sh 'git push "https://$gitUsername:$gitPass@git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git" "$SDK_VERSION"'
 				}
 			}
 	} finally {
