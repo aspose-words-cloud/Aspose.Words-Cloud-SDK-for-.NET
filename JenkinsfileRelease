@@ -8,7 +8,7 @@ parameters {
 
 def buildCacheImage = "docker.registry.svc.k8s.dynabic.com/words/cloud/sdk/net/release"
 
-node('words-linux') {
+node('sdk-linux') {
 	try {
 			stage('checkout'){
 				checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'LocalBranch', localBranch: "**"]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '361885ba-9425-4230-950e-0af201d90547', url: 'https://git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git']]])
@@ -46,7 +46,7 @@ stage('wait for publish confirmation'){
 	}
 }	
 
-node('words-linux') {
+node('sdk-linux') {
 	try {
 			stage('checkout'){
 				checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'LocalBranch', localBranch: "**"]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '361885ba-9425-4230-950e-0af201d90547', url: 'https://git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git']]])
