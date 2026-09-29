@@ -26,7 +26,8 @@ node('sdk-linux') {
 				sh 'mkdir -p packages'
 				withCredentials([
                     usernamePassword(credentialsId: 'ssl.com', usernameVariable: 'SSL_USERNAME', passwordVariable: 'SSL_PASSWORD'),
-					string(credentialsId: 'sslSecret', variable: 'SSL_SECRET')
+					string(credentialsId: 'sslSecret', variable: 'SSL_SECRET'),
+                    file(credentialsId: 'snkFile', variable: 'SNK_FILE'),
 				]) {
 					docker.image(buildCacheImage).inside('-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp') {
 						sh 'cd /build && bash scripts/build-release.sh && cp packages/*.nupkg "$WORKSPACE/packages/"'
