@@ -46,7 +46,7 @@ node('sdk-linux') {
                         '-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp'
                     ) {
                         sh '''
-                            set -euo pipefail
+                            set -eu
 
                             cd /build
 
@@ -85,7 +85,7 @@ node('sdk-linux') {
                         '-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp'
                     ) {
                         sh '''
-                            set -euo pipefail
+                            set -eu
 
                             cd /build
 
@@ -129,7 +129,7 @@ node('sdk-linux') {
                         '-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp'
                     ) {
                         sh '''
-                            set -euo pipefail
+                            set -eu
 
                             cd /build
 
