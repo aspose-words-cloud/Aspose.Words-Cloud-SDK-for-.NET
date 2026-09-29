@@ -25,4 +25,4 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Aspose.Words.Cloud.Sdk.Tests")]
+//[assembly: InternalsVisibleTo("Aspose.Words.Cloud.Sdk.Tests")]
