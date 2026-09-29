@@ -25,8 +25,7 @@ node('sdk-linux') {
 
 				sh 'mkdir -p packages'
 				withCredentials([
-					file(credentialsId: 'sslUsername', variable: 'SSL_USERNAME'),
-					file(credentialsId: 'sslPasword', variable: 'SSL_PASSWORD'),
+                    usernamePassword(credentialsId: 'ssl.com', usernameVariable: 'SSL_USERNAME', passwordVariable: 'SSL_PASSWORD'),
 					string(credentialsId: 'sslSecret', variable: 'SSL_SECRET')
 				]) {
 					docker.image(buildCacheImage).inside('-e HOME=/tmp -e DOTNET_CLI_HOME=/tmp') {
