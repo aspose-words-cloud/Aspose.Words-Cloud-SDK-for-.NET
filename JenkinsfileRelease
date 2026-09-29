@@ -24,7 +24,7 @@ node('sdk-linux') {
 				sh (script: "docker push ${buildCacheImage}")
                 
                 // create package 
-                sh 'mkdir -p $WORKSPACE/package/lib/netstandard2.0 $WORKSPACE/package/License'
+                sh 'mkdir -p $WORKSPACE/package/lib/netstandard2.0 $WORKSPACE/package/License $WORKSPACE/packages'
 
                 withCredentials([
                     usernamePassword(
@@ -51,7 +51,7 @@ node('sdk-linux') {
 
                             cd /build
                             
-                            cp Aspose.Words.Cloud.Sdk/bin/Release/netstandard2.0/aspose_word-for-net.png $WORKSPACE/package/ $WORKSPACE/packages/
+                            cp Aspose.Words.Cloud.Sdk/bin/Release/netstandard2.0/aspose_word-for-net.png $WORKSPACE/package
                             cp -r License/. $WORKSPACE/package/License/
 
                             project=Aspose.Words.Cloud.Sdk/Aspose.Words.Cloud.Sdk.csproj
@@ -91,19 +91,10 @@ node('sdk-linux') {
                             set -eu
 
                             cd /build
+                            
+                            osslsigncode verify -in "$WORKSPACE/package/lib/netstandard2.0/Aspose.Words.Cloud.Sdk.dll"
 
-                            dll="Aspose.Words.Cloud.Sdk/bin/Release/netstandard2.0/Aspose.Words.Cloud.Sdk.dll"
-                            project="Aspose.Words.Cloud.Sdk/Aspose.Words.Cloud.Sdk.csproj"
-
-                            osslsigncode verify -in "$dll"
-
-                            cp "$dll" package/lib/netstandard2.0/
-                            cp Aspose.Words.Cloud.Sdk/bin/Release/netstandard2.0/Aspose.Words.Cloud.Sdk.pdb package/lib/netstandard2.0/
-                            cp Aspose.Words.Cloud.Sdk/bin/Release/netstandard2.0/Aspose.Words.Cloud.Sdk.xml package/lib/netstandard2.0/
-                            cp Aspose.Words.Cloud.Sdk/bin/Release/netstandard2.0/aspose_word-for-net.png package/
-                            cp -r License/. package/License/
-
-                            dotnet pack "$project" \
+                            dotnet pack "Aspose.Words.Cloud.Sdk/Aspose.Words.Cloud.Sdk.csproj" \
                                 -c Release \
                                 --no-build \
                                 -p:NuspecFile=/build/Aspose.Words.Cloud.Sdk/Aspose.Words-Cloud.nuspec \
