@@ -8,7 +8,7 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <icon>aspose_word-for-net.png</icon>
-    <repository type="git" url="https://github.com/aspose-words-cloud/Aspose.Words-Cloud-SDK-for-.NET.git" />
+    <repository type="git" url="https://git.auckland.dynabic.com/words-cloud/words-cloud-dotnet.git" />
     <description>Aspose Cloud SDK that allows to work with Word documents in Aspose Cloud from .NET applications.
 
 The package enables your application to perform a wide range of document processing tasks. You can generate, load, modify, save, render documents without utilizing Microsoft Word®. You can convert documents between the following formats: DOC/DOCX, DOT/DOTX, DOCM, DOTM, XML, RTF, PDF, HTML/MHTML, MOBI, ODT, OTT, TXT, XPS, SVG, EPUB, XAML, PS, PCL, TIFF, BMP, PNG, EMF, JPEG, GIF and other formats.
