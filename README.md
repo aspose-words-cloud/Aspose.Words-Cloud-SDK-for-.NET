@@ -16,6 +16,22 @@ Feel free to explore the [Developer's Guide](https://docs.aspose.cloud/display/w
 - Add & remove watermarks and protection.
 - Read & write access to Document Object Model.
 
+## Enhancements in Version 26.10
+
+- Added 'AdvancedOptions' property for CompareData class.
+
+
+## Enhancements in Version 26.9
+
+- Added 'CompressionLevel' property for XpsSaveOptionsData class.
+- Added 'GenerateFormFieldScripts' property for PdfSaveOptionsData class.
+
+
+## Enhancements in Version 26.6
+
+- Download file with chunks was fixed.
+
+
 ## Enhancements in Version 26.4
 
 - Implemented jobs system to perform operations without an active connection to the server.
