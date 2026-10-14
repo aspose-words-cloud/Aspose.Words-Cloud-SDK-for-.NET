@@ -1,9 +1,9 @@
-FROM git.auckland.dynabic.com:4567/words-cloud/api/net/buildenv
+FROM mcr.microsoft.com/dotnet/sdk:9.0
 
+RUN apt-get -o APT::Sandbox::User=root update && apt-get -o APT::Sandbox::User=root install -y --no-install-recommends osslsigncode && rm -rf /var/lib/apt/lists/*
 
-# Use shell form to start developer command prompt and any other commands specified
 WORKDIR /build
-
-SHELL ["cmd.exe", "/s", "/c"]
+ENV NUGET_PACKAGES=/build/.nuget/packages
 COPY . .
 RUN dotnet build Aspose.Words.Cloud.Sdk.sln -c Release
+RUN chmod -R a+rwX /build

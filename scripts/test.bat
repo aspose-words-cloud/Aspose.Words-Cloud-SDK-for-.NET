@@ -1,1 +1,0 @@
-dotnet test c:\build\Aspose.Words.Cloud.Sdk.%1\Aspose.Words.Cloud.Sdk.%1.csproj --framework %2 --logger "junit;LogFilePath=c:\Build\testResults\%1-results-%2.xml" --logger:console;verbosity=normal --no-build --no-restore
