@@ -63,6 +63,11 @@ namespace Aspose.Words.Cloud.Sdk.Model
             /// Enum value "RipeMD160"
             /// </summary>
             RipeMD160,
+
+            /// <summary>
+            /// Enum value "Auto"
+            /// </summary>
+            Auto,
         }
 
         /// <summary>
