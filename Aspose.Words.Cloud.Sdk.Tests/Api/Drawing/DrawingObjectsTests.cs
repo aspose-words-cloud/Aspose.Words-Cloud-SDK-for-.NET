@@ -452,6 +452,77 @@ namespace Aspose.Words.Cloud.Sdk.Tests.Api.Drawing
         }
 
         /// <summary>
+        /// Test for adding drawing object with the image from the storage.
+        /// </summary>
+        [Test]
+        public async Task TestInsertDrawingObjectByReference()
+        {
+            string remoteFileName = "TestInsertDrawingObjectByReference.docx";
+            string remoteImagePath = remoteDataFolder + "/TestInsertDrawingObjectByReference.png";
+
+            await this.UploadFileToStorage(
+                remoteDataFolder + "/" + remoteFileName,
+                null,
+                null,
+                File.ReadAllBytes(LocalTestDataFolder + localFile)
+            );
+            await this.UploadFileToStorage(
+                remoteImagePath,
+                null,
+                null,
+                File.ReadAllBytes(LocalTestDataFolder + "Common/aspose-cloud.png")
+            );
+
+            var requestDrawingObjectImageReference = new FileReference(remoteImagePath);
+            var requestDrawingObject = new DrawingObjectInsertData()
+            {
+                Height = 0f,
+                Left = 0f,
+                Top = 0f,
+                Width = 0f,
+                RelativeHorizontalPosition = DrawingObjectInsertData.RelativeHorizontalPositionEnum.Margin,
+                RelativeVerticalPosition = DrawingObjectInsertData.RelativeVerticalPositionEnum.Margin,
+                WrapType = DrawingObjectInsertData.WrapTypeEnum.Inline,
+                ImageReference = requestDrawingObjectImageReference
+            };
+            var request = new InsertDrawingObjectByReferenceRequest(
+                name: remoteFileName,
+                drawingObject: requestDrawingObject,
+                nodePath: "",
+                folder: remoteDataFolder
+            );
+            var actual = await this.WordsApi.InsertDrawingObjectByReference(request);
+        }
+
+        /// <summary>
+        /// Test for adding drawing object online with the image from the request.
+        /// </summary>
+        [Test]
+        public async Task TestInsertDrawingObjectByReferenceOnline()
+        {
+            using var requestDocument = File.OpenRead(LocalTestDataFolder + localFile);
+            using var requestDrawingObjectImageReferenceStream = File.OpenRead(LocalTestDataFolder + "Common/aspose-cloud.png");
+            var requestDrawingObjectImageReference = new FileReference(requestDrawingObjectImageReferenceStream);
+            var requestDrawingObject = new DrawingObjectInsertData()
+            {
+                Height = 0f,
+                Left = 0f,
+                Top = 0f,
+                Width = 0f,
+                RelativeHorizontalPosition = DrawingObjectInsertData.RelativeHorizontalPositionEnum.Margin,
+                RelativeVerticalPosition = DrawingObjectInsertData.RelativeVerticalPositionEnum.Margin,
+                WrapType = DrawingObjectInsertData.WrapTypeEnum.Inline,
+                ImageReference = requestDrawingObjectImageReference
+            };
+            var request = new InsertDrawingObjectByReferenceOnlineRequest(
+                document: requestDocument,
+                drawingObject: requestDrawingObject,
+                nodePath: ""
+            );
+            var actual = await this.WordsApi.InsertDrawingObjectByReferenceOnline(request);
+        }
+
+        /// <summary>
         /// Test for deleting drawing object.
         /// </summary>
         [Test]

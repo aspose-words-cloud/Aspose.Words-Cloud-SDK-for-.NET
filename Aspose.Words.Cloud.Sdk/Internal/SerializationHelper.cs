@@ -103,6 +103,7 @@ namespace Aspose.Words.Cloud.Sdk
             { "DrawingObject, _", typeof(DrawingObject) },
             { "DrawingObjectCollection, _", typeof(DrawingObjectCollection) },
             { "DrawingObjectInsert, _", typeof(DrawingObjectInsert) },
+            { "DrawingObjectInsertData, _", typeof(DrawingObjectInsertData) },
             { "DrawingObjectLink, _", typeof(DrawingObjectLink) },
             { "DrawingObjectResponse, _", typeof(DrawingObjectResponse) },
             { "DrawingObjectsResponse, _", typeof(DrawingObjectsResponse) },

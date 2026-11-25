@@ -2290,6 +2290,28 @@ namespace Aspose.Words.Cloud.Sdk
         }
 
         /// <summary>
+        /// Inserts a new DrawingObject to the document node. The image is passed by reference:
+        /// a storage path in the document folder or its subfolders, an HTTP(S) URL, or a request part.
+        /// </summary>
+        /// <param name="request">Request. <see cref="InsertDrawingObjectByReferenceRequest" /></param>
+        /// <returns><see cref="DrawingObjectResponse" /></returns>
+        public async Task<DrawingObjectResponse> InsertDrawingObjectByReference(InsertDrawingObjectByReferenceRequest request)
+        {
+            return (DrawingObjectResponse)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+        }
+
+        /// <summary>
+        /// Inserts a new DrawingObject to the document node. The image is passed by reference:
+        /// a storage path in the document folder or its subfolders, an HTTP(S) URL, or a request part.
+        /// </summary>
+        /// <param name="request">Request. <see cref="InsertDrawingObjectByReferenceOnlineRequest" /></param>
+        /// <returns><see cref="InsertDrawingObjectByReferenceOnlineResponse" /></returns>
+        public async Task<InsertDrawingObjectByReferenceOnlineResponse> InsertDrawingObjectByReferenceOnline(InsertDrawingObjectByReferenceOnlineRequest request)
+        {
+            return (InsertDrawingObjectByReferenceOnlineResponse)await request.DeserializeResponse(await this.apiInvoker.InvokeApi(async () => await request.CreateHttpRequest(this.configuration, this)));
+        }
+
+        /// <summary>
         /// Inserts a new DrawingObject to the document node.
         /// </summary>
         /// <param name="request">Request. <see cref="InsertDrawingObjectOnlineRequest" /></param>
